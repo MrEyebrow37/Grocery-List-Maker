@@ -29,7 +29,7 @@ const getAccessToken = () => {
     const response = axios(config)
     return response
     .then(res => res.data)
-    .catch(res => console.log(res))
+    .catch(e => console.log(e))
 }
 
 module.exports = getAccessToken
