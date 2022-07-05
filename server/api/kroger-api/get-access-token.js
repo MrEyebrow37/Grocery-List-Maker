@@ -4,20 +4,20 @@ const axios = require('axios').default
 
 const getAccessToken = () => {
 
-    const details = {
+    const dataParams = {
         'scope': 'product.compact',
         'grant_type': 'client_credentials',
     }
     
-    const data = Object.entries(details).map(detail => {
-        const encodedKey = encodeURIComponent(detail[0])
-        const encodedValue = encodeURIComponent(detail[1])
+    const data = Object.entries(dataParams).map(param => {
+        const encodedKey = encodeURIComponent(param[0])
+        const encodedValue = encodeURIComponent(param[1])
         return encodedKey + "=" + encodedValue
     })
     .join("&")
     
     const config = {
-        "url": `${krogerConfig.authUri}`,
+        "url": `${krogerConfig.authUrl}`,
         "method": "POST",
         "headers": {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -27,8 +27,10 @@ const getAccessToken = () => {
     }
     
     const response = axios(config)
-    return response
-    .then(res => res.data)
+    response
+    .then(token => {
+        process.env.KROGER_ACCESS_TOKEN = token.data.access_token
+    })
     .catch(e => console.log(e))
 }
 

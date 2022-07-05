@@ -15,7 +15,6 @@ const getResponse = async() => {
     })
     return response
 }
-console.log(getResponse())
 getResponse
 .then(res => console.log(res))
 .catch(res => console.log(res))
