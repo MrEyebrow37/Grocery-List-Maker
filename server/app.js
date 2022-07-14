@@ -9,9 +9,18 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
+// Kroger API ///////////////////////////////////////////////////////////////////////////
+
+const krogerConfig = require('./config/kroger-config')
 const getAccessToken = require('./api/kroger-api/get-access-token')
 const getLocations = require('./api/kroger-api/get-locations')
 const getProducts = require('./api/kroger-api/get-products')
+
+// MongoDB API ///////////////////////////////////////////////////////////////////////////
+
+const {bulkOperate,find} = require('./api/mongodb-api/mongodb')
+
+///////////////////////////////////////////////////////////////////////////
 
 const getNewAccessToken = new CronJob({
     cronTime: '1 0,20,40 * * * *',
@@ -21,21 +30,86 @@ const getNewAccessToken = new CronJob({
     runOnInit: true
 }).start()
 
+// Routes /////////////////////////////////////////////////////////////////////////
+
 app.post("/locations",async(req,res) => {
     const locations = await getLocations({
-        authToken: `Bearer ${process.env.KROGER_ACCESS_TOKEN}`,
+        authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
         ...req.body,
     })
-    res.send({...locations})
+    res.send(locations)
 })
 
 app.post("/products", async(req,res) => {
     const products = await getProducts({
-        authToken: `Bearer ${process.env.KROGER_ACCESS_TOKEN}`,
+        authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
         ...req.body,
     })
-    console.log(products)
-    res.send({...products})
+    res.send(products)
+})
+
+app.post("/recipes",async(req,res) => {
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `recipes`,
+        operations: [req.body],
+    }
+    const response = await bulkOperate(config)
+    res.send(response)
+})
+
+app.post("/getRecipes",async(req,res) => {
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `recipes`,
+        filter: req.body,
+    }
+    const response = await find(config)
+    res.send(response)
+})
+
+app.post("/register",async(req,res) => {
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `users`,
+        filter: req.body.filter,
+        operations: [req.body.operations],
+    }
+    const exists = await find(config)
+    if (exists[0]) {
+        res.send({response: "This username already exists. Please choose a different one."})
+    } else {
+        const response = await bulkOperate(config)
+        res.send(response)
+    }
+})
+
+app.post("/login",async(req,res) => {
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `users`,
+        filter: req.body.filter,
+        operations: [req.body.operations],
+    }
+    const exists = await find(config)
+    if (exists[0] && req.body.params.password === exists[0].password) {
+        res.send({response: "Success!"})
+    } else if (exists[0] && req.body.params.password !== exists[0].password) {
+        res.send({response: "Sorry, the username and password didn't match. Please try again."})
+    } else {
+        res.send({response: "Sorry, the username you entered doesn't exist. Please try again."})
+    }
+})
+
+app.post("/setZipCode",async(req,res) => {
+    console.log(req.body)
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `users`,
+        operations: [req.body.operations],
+    }
+    await bulkOperate(config).then(response => res.send(response))
+    .catch(response => console.log(response))
 })
 
 app.listen(4040)

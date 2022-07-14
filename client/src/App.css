@@ -1,0 +1,50 @@
+select {
+    display: inline;
+}
+
+p {
+    display: inline;
+}
+
+details.location {
+    border: .5px solid black;
+}
+
+details.locations div {
+    display: inline;
+    position: absolute;
+    cursor: default;
+    background-color: lightblue;
+}
+
+button {
+    cursor: pointer;
+}
+
+nav {
+    display: inline-block;
+}
+
+summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.App {
+    display: grid;
+    grid-template-areas: "header header"
+    "main main"
+    "footer footer";
+}
+
+header {
+    grid-area: header;
+}
+
+main {
+    grid-area: main;
+}
+
+footer {
+    grid-area: footer;
+}

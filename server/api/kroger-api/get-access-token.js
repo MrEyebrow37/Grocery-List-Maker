@@ -30,6 +30,7 @@ const getAccessToken = () => {
     response
     .then(token => {
         process.env.KROGER_ACCESS_TOKEN = token.data.access_token
+        krogerConfig.krogerAccessToken = token.data.access_token
     })
     .catch(e => console.log(e))
 }
