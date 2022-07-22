@@ -11,9 +11,10 @@ const Product = ({product,state,functions}) => {
         <div>
             <details>
                 <summary>
+                    <img src={product.images[0].sizes[1].url} alt="image" width="200" height="200"></img>
+                    <br/>
                     <p>{`${product.description} $${product.items[0].price.regular}`}</p>
                     <p>Size: {product.items[0].size}</p>
-                    <img src={product.images[0].sizes[1].url} alt="image" width="42" height="42"></img>
                 </summary>
                 {state.userInfo.recipes.map(recipe => {
                     return <button onClick={(e) => {
