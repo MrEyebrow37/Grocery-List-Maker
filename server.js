@@ -1,6 +1,7 @@
 require('dotenv').config()
 const axios = require('axios').default
 const express = require("express")
+const path = require('path')
 const CronJob = require('cron').CronJob
 const cors = require('cors')
 const bodyParser = require('body-parser')

@@ -10,7 +10,7 @@ const App = () => {
   let port = `http://localhost:4040`
 
   if (process.env.NODE_ENV === `production`) {
-    port = `https://kroger-grocery-list-maker.herokuapp.com/`
+    port = `https://kroger-grocery-list-maker.herokuapp.com`
   }
 
   // State ///////////////////////////////////////////////////////////////////////////
