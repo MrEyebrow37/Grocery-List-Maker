@@ -121,4 +121,4 @@ if (process.env.NODE_ENV === `production`) {
     })
 }
 
-app.listen(4040)
+app.listen(process.env.PORT)
