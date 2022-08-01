@@ -1,4 +1,4 @@
-import {useState,useEffect} from 'react'
+import {useState} from 'react'
 import Product from './kroger-product'
 
 const Recipe = ({recipe,state,functions}) => {
@@ -9,7 +9,6 @@ const Recipe = ({recipe,state,functions}) => {
         const totalCost = Object.values(recipe.products).reduce((prev,curr) => {
             return Number(prev) + Number(curr.quantityInRecipe)*Number(curr.items[0].price.regular)
         },0)
-    
     
         const incrementServings = () => {
             setServings(prev => prev+1)

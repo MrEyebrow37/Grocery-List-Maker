@@ -19,8 +19,13 @@ const App = () => {
     alert(data)
   }
 
+  let port = `http://localhost:4040`
+  if (process.env.NODE_ENV === `production`) {
+    port = `https://kroger-grocery-list-maker.herokuapp.com`
+    // setPort(`http://localhost:4040`)
+  }
+
   // State ///////////////////////////////////////////////////////////////////////////
-  const [port,setPort] = useState(`http://localhost:4040`)
   const [userInfo, setUserInfo] = useState({username: "guest"})
   const [products, setProducts] = useState([])
   const [recipes,setRecipes] = useState([""])
@@ -45,15 +50,9 @@ const App = () => {
       chain: `kroger`,
     }
   })
-  
-  if (process.env.NODE_ENV === `production`) {
-    setPort(`https://kroger-grocery-list-maker.herokuapp.com`)
-    // setPort(`http://localhost:4040`)
-  }
 
   const state = {
     port: port,
-    setPort: setPort,
     userInfo: userInfo,
     setUserInfo: setUserInfo,
     products: products,
@@ -65,8 +64,6 @@ const App = () => {
     searchBox: searchBox,
     setSearchBox: setSearchBox,
   }
-
-  console.log(state.products)
 
   // Functions ///////////////////////////////////////////////////////////////////////////
 
