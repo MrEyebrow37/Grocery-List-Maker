@@ -3,6 +3,10 @@ import {useState} from 'react'
 const Product = ({product,state,functions}) => {
     const [quantity, setQuantity] = useState(1)
 
+    console.log(product.sizes[0])
+
+
+
     const handleQuantityChange = (e) => {
         setQuantity(e.target.value)
     }
@@ -16,8 +20,9 @@ const Product = ({product,state,functions}) => {
                     <p>{`${product.description} $${product.items[0].price.regular}`}</p>
                     <p>Size: {product.items[0].size}</p>
                 </summary>
-                {state.userInfo.recipes.map(recipe => {
-                    return <button onClick={(e) => {
+
+                {state.recipes.map((recipe,index) => {
+                    return <button key={index}onClick={(e) => {
                         functions.addToRecipe({recipeTitle: e.target.childNodes[0].data, product: product, quantityInRecipe: Number(quantity)})
                     }}>{recipe.title}</button>
                 })}
@@ -26,10 +31,19 @@ const Product = ({product,state,functions}) => {
                     functions.addToRecipe({recipeTitle: recipeTitle, product: product, quantityInRecipe: Number(quantity)})
                 }}>Make New Recipe</button>
                 Add
-                <select onChange ={(e) => {handleQuantityChange(e)}}>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
+                <input onChange ={(e) => {handleQuantityChange(e)}}></input>
+                <select>
+                    {product.sizes[0].map((size,index) => {
+                        if (size.size === size.originalSize) {
+                            return <option selected key={index}>
+                                {size.size}
+                            </option>
+                        } else {
+                            return <option key={index}>
+                            {size.size}
+                        </option>
+                        }
+                    })}
                 </select>
                 to Recipe
             </details>

@@ -5,6 +5,7 @@ const path = require('path')
 const CronJob = require('cron').CronJob
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const convert = require('convert-units')
 
 const app = express()
 app.use(cors())
@@ -46,6 +47,54 @@ app.post("/api/products", async(req,res) => {
         authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
         ...req.body,
     })
+    console.log(products)
+    products.data.forEach(product => {
+        const sizes = product.items[0].size.split(` / `).flatMap(size => {
+            if (!product.items[0].price) {
+                return {
+                    originalQuantity: `1`,
+                    originalSize: `oz`,
+                    originalPrice: 0,
+                }
+            } else if (size.split(` `)[1] === `fl`) {
+                return {
+                    originalQuantity: size.split(` `)[0],
+                    originalSize: `fl-oz`,
+                    originalPrice: 0,
+                }
+            } else if (size.split(` `)[1] === `pt` || size.split(` `)[1] === `pint`) {
+                return {
+                    originalQuantity: size.split(` `)[0],
+                    originalSize: `pnt`,
+                    originalPrice: 0,
+                }
+            } else {
+                return {
+                    originalQuantity: size.split(` `)[0],
+                    originalSize: size.split(` `)[1],
+                    originalPrice: product.items[0].price.regular,
+                }
+            }
+        })
+
+        const newSizes = sizes.map(size => {
+            if (size.originalSize && size.originalSize !== (`ct`) && size.originalSize !== (`12pk`) && size.originalSize !== (`bottles`) && size.originalSize !== (`pouches`)) {
+                possibleSizes = convert().from(size.originalSize).possibilities()
+                const newPossibleSizes = possibleSizes.map(possible => {
+                    const conversionFraction = convert(1).from(size.originalSize).to(possible)
+                    return {...size,
+                        size: possible,
+                        conversionFraction: conversionFraction,
+                        price: size.originalPrice*conversionFraction,
+                        pricePerOriginalSize: size.originalQuantity/size.originalPrice,
+                    }
+                })
+                return newPossibleSizes
+            }
+        })
+        product.sizes = newSizes
+    })
+    console.log(products.data[0].sizes)
     res.send(products)
 })
 
@@ -70,6 +119,7 @@ app.post("/api/getRecipes",async(req,res) => {
 })
 
 app.post("/api/register",async(req,res) => {
+    console.log("register")
     const config = {
         database: `grocery-list-maker`,
         collection: `users`,
@@ -86,6 +136,7 @@ app.post("/api/register",async(req,res) => {
 })
 
 app.post("/api/login",async(req,res) => {
+    console.log("login")
     const config = {
         database: `grocery-list-maker`,
         collection: `users`,
@@ -94,7 +145,7 @@ app.post("/api/login",async(req,res) => {
     }
     const exists = await find(config)
     if (exists[0] && req.body.params.password === exists[0].password) {
-        res.send({response: "Success!"})
+        res.send({response: "Success!",krogerLocation: exists[0].krogerLocation})
     } else if (exists[0] && req.body.params.password !== exists[0].password) {
         res.send({response: "Sorry, the username and password didn't match. Please try again."})
     } else {

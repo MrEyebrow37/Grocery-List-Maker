@@ -23,6 +23,7 @@ const find = async({database,collection,filter}) => {
         await client.connect()
         const coll = client.db(`${database}`).collection(`${collection}`)
         const response = await coll.find(filter).toArray()
+        console.log(response)
         return response
 
     } catch (e) {
