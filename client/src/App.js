@@ -253,8 +253,8 @@ const App = () => {
             <Link to="/register">Register</Link>
           </nav>
           <button onClick={() => {getRecipes({username: userInfo.username},state,functions)}}>Get Recipes</button>
-          <button onClick={saveData}>Save!</button>
-          <button onClick={getData}>Display Info!</button>
+          <button onClick={() => {saveData()}}>Save!</button>
+          <button onClick={() => {getData()}}>Display Info!</button>
         </header>
         
         <Routes>
