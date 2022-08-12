@@ -24,10 +24,10 @@ const login = async(params,state,functions) => {
         body: JSON.stringify(data)
       })
       .then(res => res.json())
-      .then(res => {
+      .then(async res => {
         if (res.response === `Success!`) {
-          state.setUserInfo({username: params.username, krogerLocation: res.krogerLocation})
-          state.setSearchBox(prevState => {
+          await state.setUserInfo({username: params.username, krogerLocation: res.krogerLocation})
+          await state.setSearchBox(prevState => {
             const newState = {...prevState}
             newState.product.locationId = res.krogerLocation
             return newState
@@ -35,12 +35,11 @@ const login = async(params,state,functions) => {
         } else {
           console.log(res)
         }
+        functions.getRecipes({username: document.querySelector(`.username`).value},state.searchBox.product,state,functions)
         document.querySelector(`.password`).value = ''
         document.querySelector(`.username`).value = ''
       })
       .catch(e => console.log(e))
-      console.log(state.userInfo.username)
-      functions.getRecipes({username: state.userInfo.username},state,functions)
 }
 
 export default login

@@ -1,21 +1,27 @@
 import {useState} from 'react'
 import Product from './kroger-product'
+import RecipeProduct from './kroger-product-recipes'
 
 const Recipe = ({recipe,state,functions}) => {
-    const [servings, setServings] = useState(6)
-    //todo set servings in initial recipe creation
+
+    console.log(recipe)
     
     if (recipe) {
         const totalCost = Object.values(recipe.products).reduce((prev,curr) => {
-            return Number(prev) + Number(curr.quantityInRecipe)*Number(curr.items[0].price.regular)
+            return Number(prev) + Number(curr.quantityInRecipe)*Number(curr.krogerInfo.items[0].price.regular)
         },0)
     
-        const incrementServings = () => {
-            setServings(prev => prev+1)
-        }
-    
-        const decrementServings = () => {
-            setServings(prev => prev-1)
+        const handleServingsChange = (e,action) => {
+            state.setRecipes(prev => {
+                const newState = [...prev]
+                const foundRecipe = newState.find(stateRecipe => stateRecipe._id === recipe._id)
+                if (action === `add`) {
+                    foundRecipe.servings = foundRecipe.servings+1
+                } else {
+                    foundRecipe.servings = foundRecipe.servings-1
+                }
+                return newState
+            })
         }
     
         return (
@@ -23,13 +29,13 @@ const Recipe = ({recipe,state,functions}) => {
                 <summary>
                     <p>{recipe.title}</p>
                     <p>Total cost: ${Number(totalCost.toFixed(2))}</p>
-                    <p>Servings: {servings}</p>
-                    <button onClick={() => {decrementServings()}}>-</button>
-                    <button onClick={() => {incrementServings()}}>+</button>
-                    <p>Cost per serving: ${(totalCost/servings).toFixed(2)}</p>
+                    <p>Servings: {recipe.servings}</p>
+                    <button onClick={(e) => {handleServingsChange(e,`subtract`)}}>-</button>
+                    <button onClick={(e) => {handleServingsChange(e,`add`)}}>+</button>
+                    <p>Cost per serving: ${(totalCost/recipe.servings).toFixed(2)}</p>
                 </summary>
                 {Object.values(recipe.products).map((product,index) => {
-                    return <Product product={product} state={state} functions={functions} key={index}></Product>
+                    return <RecipeProduct recipe={recipe} product={product} state={state} functions={functions} key={index}></RecipeProduct>
                 })}
             </details>
         )

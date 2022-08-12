@@ -2,6 +2,7 @@ import './App.css'
 import Product from './components/kroger-product'
 import Location from './components/kroger-location'
 import Recipe from './components/recipe'
+import RecipeProduct from './components/kroger-product-recipes'
 import {useState} from 'react'
 import {BrowserRouter as Router,Routes,Route,Link} from "react-router-dom"
 // Import functions
@@ -11,19 +12,11 @@ import {getRecipes} from './functions/recipes'
 
 const App = () => {
 
-  let saveData = () =>{
-    localStorage.setItem('Object 1', "test object");
-  }
-  let getData = () =>{
-    var data = localStorage.getItem("Object 1")
-    alert(data)
-  }
-
   let port = `http://localhost:4040`
-  if (process.env.NODE_ENV === `production`) {
-    port = `https://kroger-grocery-list-maker.herokuapp.com`
-    // setPort(`http://localhost:4040`)
-  }
+  // if (process.env.NODE_ENV === `production`) {
+  //   port = `https://kroger-grocery-list-maker.herokuapp.com`
+  //   // setPort(`http://localhost:4040`)
+  // }
 
   // State ///////////////////////////////////////////////////////////////////////////
   const [userInfo, setUserInfo] = useState({username: "guest"})
@@ -107,39 +100,17 @@ const App = () => {
     }
   }
 
-  const postRecipes = () => {
-    const operations = {
-        insertOne: {
-          document: {
-            username: userInfo.username,
-          },
-        },
-      }
-    
-    fetch(`${port}/api/recipes`, {
-      method: "post",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(operations),
-    })
-    .then(res => res.json())
-    .then(res => {
-      console.log("yes")
-      getRecipes({username: userInfo.username},state,functions)
-    })
-    .catch(e => console.log(e))
-  }
-
   const handleProductSearchBoxChange = (e) => {
     setSearchBox(prevState => {
-      prevState.product.term = e.target.value
-      return prevState
+      const newState = {...prevState}
+      newState.product.term = e.target.value
+      return newState
     })
   }
 
   const handleZipCodeSearchBoxChange = (e) => {
     setSearchBox(prevState => {
+      const newState = {...prevState}
       prevState.location.zipCode = e.target.value
       return prevState
     })
@@ -149,11 +120,12 @@ const App = () => {
     setUserInfo(prevState => {
       const newState = {...prevState}
       newState.krogerLocation = location.locationId
-      return prevState
+      return newState
     })
     setSearchBox(prevState => {
-      prevState.product.krogerLocation = location.krogerLocation
-      return prevState
+      const newState = {...prevState}
+      newState.product.krogerLocation = location.krogerLocation
+      return newState
     })
 
     const params = {
@@ -188,16 +160,33 @@ const App = () => {
     .catch(e => console.log(e))
   }
 
-  const addToRecipe = ({recipeTitle,product,quantityInRecipe}) => {
+  const addToRecipe = async({recipeTitle,product,quantityInRecipe,sizeInRecipe}) => {
+    let newRecipeTitle
+    if (recipeTitle === `Make new recipe`) {
+      newRecipeTitle = await prompt(`Please enter the title of your recipe.`)
+    } else {
+      newRecipeTitle = recipeTitle
+    }
+
+    // What info do I need to save in my database?
+    //  {
+      // productId: {
+        // quangityInRecipe
+        // sizeInRecipe
+        // sizes
+      // }
+    // }
+
     const operations = {
       updateOne: {
         filter: {
           username: userInfo.username,
-          title: recipeTitle
+          title: newRecipeTitle,
         },
         update: {
           $set: {
-            [`products.${product.productId}`]: {...product, quantityInRecipe: quantityInRecipe},
+            [`products.${product.productId}`]: {quantityInRecipe: quantityInRecipe, sizeInRecipe: sizeInRecipe,sizes: product.sizes},
+            servings: 6,
           },
         },
         upsert: true
@@ -212,7 +201,7 @@ const App = () => {
       body: JSON.stringify(operations),
     })
     .then(res => res.json())
-    .then(res => getRecipes({username: userInfo.username},state,functions))
+    .then(res => getRecipes({username: userInfo.username},searchBox.product,state,functions))
     .catch(e => console.log(e))
   }
 
@@ -220,7 +209,6 @@ const App = () => {
     getLocations: getLocations,
     getProducts: getProducts,
     getRecipes: getRecipes,
-    postRecipes: postRecipes,
     handleProductSearchBoxChange: handleProductSearchBoxChange,
     handleZipCodeSearchBoxChange: handleZipCodeSearchBoxChange,
     setUserLocation: setUserLocation,
@@ -249,9 +237,7 @@ const App = () => {
             <Link to="/login">Login</Link>
             <Link to="/register">Register</Link>
           </nav>
-          <button onClick={() => {getRecipes({username: userInfo.username},state,functions)}}>Get Recipes</button>
-          <button onClick={() => {saveData()}}>Save!</button>
-          <button onClick={() => {getData()}}>Display Info!</button>
+          <button onClick={() => {getRecipes({username: userInfo.username},searchBox.product,state,functions)}}>Get Recipes</button>
         </header>
         
         <Routes>
@@ -282,8 +268,7 @@ const App = () => {
           <Route path="/" element={
             <main>
               <button onClick={() => {getProducts(searchBox.product)}}>Get Products</button>
-              <button onClick={() => {getRecipes({username: userInfo.username},state,functions)}}>Get Recipes</button>
-              <button onClick={() => {postRecipes()}}>Post Recipes</button>
+              <button onClick={() => {getRecipes({username: userInfo.username},searchBox.product,state,functions)}}>Get Recipes</button>
               <input placeholder={`product`} name={`productSearchBox`} onChange={handleProductSearchBoxChange} onKeyUp={(e) => {
                 if (e.key === "Enter") {
                   getProducts(searchBox.product)

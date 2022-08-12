@@ -6,7 +6,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 const bulkOperate = async({database, collection, operations}) => {
     try {
-        console.log(operations)
+        // console.log(operations)
         await client.connect()
         const coll = client.db(`${database}`).collection(`${collection}`)
         const response = await coll.bulkWrite(operations)
@@ -23,7 +23,7 @@ const find = async({database,collection,filter}) => {
         await client.connect()
         const coll = client.db(`${database}`).collection(`${collection}`)
         const response = await coll.find(filter).toArray()
-        console.log(response)
+        // console.log(response)
         return response
 
     } catch (e) {

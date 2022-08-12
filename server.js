@@ -47,46 +47,51 @@ app.post("/api/products", async(req,res) => {
         authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
         ...req.body,
     })
-    console.log(products)
     products.data.forEach(product => {
         const sizes = product.items[0].size.split(` / `).flatMap(size => {
+            const sizeArray = size.split(` `)
+            let originalQuantity = Number(size.split(` `)[0])
+            if (sizeArray[0].includes(`/`)) {
+                const numberArray = sizeArray[0].split(`/`)
+                originalQuantity = parseInt(numberArray[0],10) / parseInt(numberArray[1],10)
+            }
             if (!product.items[0].price) {
                 return {
-                    originalQuantity: `1`,
+                    originalQuantity: 1,
                     originalSize: `oz`,
                     originalPrice: 0,
                 }
-            } else if (size.split(` `)[1] === `fl`) {
+            } else if (sizeArray[1] === `fl`) {
                 return {
-                    originalQuantity: size.split(` `)[0],
+                    originalQuantity: originalQuantity,
                     originalSize: `fl-oz`,
                     originalPrice: 0,
                 }
-            } else if (size.split(` `)[1] === `pt` || size.split(` `)[1] === `pint`) {
+            } else if (sizeArray[1] === `pt` || sizeArray[1] === `pint`) {
                 return {
-                    originalQuantity: size.split(` `)[0],
+                    originalQuantity: originalQuantity,
                     originalSize: `pnt`,
                     originalPrice: 0,
                 }
             } else {
                 return {
-                    originalQuantity: size.split(` `)[0],
-                    originalSize: size.split(` `)[1],
+                    originalQuantity: originalQuantity,
+                    originalSize: sizeArray[1],
                     originalPrice: product.items[0].price.regular,
                 }
             }
         })
 
-        const newSizes = sizes.map(size => {
-            if (size.originalSize && size.originalSize !== (`ct`) && size.originalSize !== (`12pk`) && size.originalSize !== (`bottles`) && size.originalSize !== (`pouches`)) {
+        const newSizes = sizes.flatMap(size => {
+            if (size.originalSize && size.originalSize !== (`ct`) && size.originalSize !== (`12pk`) && size.originalSize !== (`bottles`) && size.originalSize !== (`pouches`) && size.originalSize !== (`pk`)) {
                 possibleSizes = convert().from(size.originalSize).possibilities()
                 const newPossibleSizes = possibleSizes.map(possible => {
                     const conversionFraction = convert(1).from(size.originalSize).to(possible)
                     return {...size,
                         size: possible,
-                        conversionFraction: conversionFraction,
-                        price: size.originalPrice*conversionFraction,
-                        pricePerOriginalSize: size.originalQuantity/size.originalPrice,
+                        conversionFraction: Number(conversionFraction),
+                        pricePerThisSize: Number((size.originalPrice/conversionFraction/size.originalQuantity).toFixed(2)),
+                        pricePerOriginalSize: Number((size.originalPrice/size.originalQuantity).toFixed(2)),
                     }
                 })
                 return newPossibleSizes
@@ -94,7 +99,6 @@ app.post("/api/products", async(req,res) => {
         })
         product.sizes = newSizes
     })
-    console.log(products.data[0].sizes)
     res.send(products)
 })
 
@@ -109,13 +113,45 @@ app.post("/api/recipes",async(req,res) => {
 })
 
 app.post("/api/getRecipes",async(req,res) => {
+    // console.log(req.body)
     const config = {
         database: `grocery-list-maker`,
         collection: `recipes`,
-        filter: req.body,
+        filter: req.body.filter,
     }
-    const response = await find(config)
-    res.send(response)
+    let productsString = ``
+    let index = 0
+    const recipeResponse = await find(config)
+    recipeResponse.forEach((id) => {
+        Object.keys(id.products).forEach((id) => {
+            if (index === 0) {
+                index = 1
+                productsString = id
+            } else {
+                productsString = productsString + `,` + id
+            }
+        })
+    })
+    req.body.params.productId = `${productsString}`
+    const products = await getProducts({
+        authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
+        ...req.body.params,
+    })
+    // console.log(products.data[0])
+
+    recipeResponse.forEach(recipe => {
+        Object.entries(recipe.products).forEach(product => {
+            const krogerInfo = products.data.find(krogerProduct => krogerProduct.productId === product[0])
+            console.log(product)
+            product[1].krogerInfo = krogerInfo
+            console.log(product)
+        })
+        console.log(recipe)
+    })
+
+    // console.log(recipeResponse[0])
+
+    res.send(recipeResponse)
 })
 
 app.post("/api/register",async(req,res) => {

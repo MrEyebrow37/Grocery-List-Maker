@@ -1,26 +1,32 @@
-import {useState,useEffect} from 'react'
+import {useState,useEffect,useMemo} from 'react'
 
-const Product = ({product,state,functions}) => {
-    const [quantity, setQuantity] = useState(1)
-    const [unit,setUnit] = useState(product.sizes[0].originalSize)
+const RecipeProduct = ({product,recipe,state,functions}) => {
+    // const quantity = product.quantityInRecipe
+    // const size = product.sizes.find(size => size.size === product.sizeInRecipe)
+    let price = useMemo(() => product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe)
     const [imageNumber,setImageNumber] = useState(0)
 
+    useEffect(() => {
+        price = product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe
+    })
+
+
     let imagePerspective
-    if (product.images.some(image => image.perspective === `front`)) {
+    if (product.krogerInfo.images.some(image => image.perspective === `front`)) {
         imagePerspective = `front`
-    } else if (product.images.some(image => image.perspective === `top`)) {
+    } else if (product.krogerInfo.images.some(image => image.perspective === `top`)) {
         imagePerspective = `top`
-    } else if (product.images.some(image => image.perspective === `right`)) {
+    } else if (product.krogerInfo.images.some(image => image.perspective === `right`)) {
         imagePerspective = `right`
-    } else if (product.images.some(image => image.perspective === `left`)) {
+    } else if (product.krogerInfo.images.some(image => image.perspective === `left`)) {
         imagePerspective = `left`
-    } else if (product.images.some(image => image.perspective === `back`)) {
+    } else if (product.krogerInfo.images.some(image => image.perspective === `back`)) {
         imagePerspective = `back`
     }
 
     const sortBy = [`front`,`right`,`back`,`left`,`top`,`bottom`]
 
-    const imagesArray = product.images.flatMap(imagePerspective => {
+    const imagesArray = product.krogerInfo.images.flatMap(imagePerspective => {
         let index = imagePerspective.sizes.findIndex(imageSize => imageSize.size === `xlarge`)
         if (index !== -1) {
             return {...imagePerspective.sizes[index],perspective: imagePerspective.perspective}
@@ -67,6 +73,20 @@ const Product = ({product,state,functions}) => {
         }
     }
 
+    const handleProductChange = async(e,parameterToChange) => {
+        await state.setRecipes(prev => {
+            const newState = [...prev]
+            const foundRecipe = newState.find(stateRecipe => stateRecipe._id === recipe._id)
+            const foundProduct = Object.values(foundRecipe.products).find(stateProduct => stateProduct.krogerInfo.productId === product.krogerInfo.productId)
+            if (parameterToChange === `quantity`) {
+                foundProduct.quantityInRecipe = e.target.value
+            } else if (parameterToChange === `size`) {
+                foundProduct.sizeInRecipe = e.target.value
+            }
+            return newState
+        })
+    }
+
     return (
         <div>
             <details>
@@ -75,17 +95,13 @@ const Product = ({product,state,functions}) => {
                     <img src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
                     <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
                     <br/>
-                    <p>{`${product.description} $${product.items[0].price.regular}`}</p>
-                    <p>Size: {product.items[0].size}</p>
+                    <p>{`${product.krogerInfo.description} $${product.krogerInfo.items[0].price.regular}`}</p>
+                    <p>Size: {product.krogerInfo.items[0].size}</p>
                 </summary>
-                Add
-                <input defaultValue={quantity} placeHolder={`Quantity`} onChange={(e) => {setQuantity(e.target.value)}}></input>
-                <select defaultValue={unit} onChange={(e) => {setUnit(e.target.value)}}>
+                <input defaultValue={product.quantityInRecipe} onChange ={(e) => {handleProductChange(e,`quantity`)}}></input>
+                <select onChange={(e) => {handleProductChange(e,`size`)}}>
                     {product.sizes.map((size,index) => {
-                        // return <option key={index}>
-                        //     {size.size}
-                        // </option>
-                        if (size.size === size.originalSize) {
+                        if (size.size === product.sizeInRecipe) {
                             return <option selected key={index}>
                                 {size.size}
                             </option>
@@ -96,17 +112,10 @@ const Product = ({product,state,functions}) => {
                         }
                     })}
                 </select>
-                to 
-                <select className={`recipeSelector`}>
-                    <option>Make new recipe</option>
-                    {state.recipes.map((recipe,index) => {
-                        return <option key={index}>{recipe.title}</option>
-                    })}
-                </select>
-                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.recipeSelector`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
+                <p>{price}</p>
             </details>
         </div>
     )
 }
 
-export default Product
+export default RecipeProduct
