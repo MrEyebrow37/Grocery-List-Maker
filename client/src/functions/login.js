@@ -35,7 +35,7 @@ const login = async(params,state,functions) => {
         } else {
           console.log(res)
         }
-        functions.getRecipes({username: document.querySelector(`.username`).value},state.searchBox.product,state,functions)
+        functions.getRecipes({username: document.querySelector(`.username`).value},{...state.searchBox.product,locationId: res.krogerLocation},state,functions)
         document.querySelector(`.password`).value = ''
         document.querySelector(`.username`).value = ''
       })

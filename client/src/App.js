@@ -3,7 +3,7 @@ import Product from './components/kroger-product'
 import Location from './components/kroger-location'
 import Recipe from './components/recipe'
 import RecipeProduct from './components/kroger-product-recipes'
-import {useState} from 'react'
+import {useEffect, useState,useLayoutEffect} from 'react'
 import {BrowserRouter as Router,Routes,Route,Link} from "react-router-dom"
 // Import functions
 import login from './functions/login'
@@ -29,7 +29,7 @@ const App = () => {
       term: "",
       locationId: "",
       productId: "",
-      fulfillment: "",
+      fulfillment: "inStore",
       start: "",
       limit: 50,
       // 1-50
@@ -117,6 +117,7 @@ const App = () => {
   }
 
   const setUserLocation = (location) => {
+    console.log(location.locationId)
     setUserInfo(prevState => {
       const newState = {...prevState}
       newState.krogerLocation = location.locationId
@@ -124,7 +125,7 @@ const App = () => {
     })
     setSearchBox(prevState => {
       const newState = {...prevState}
-      newState.product.krogerLocation = location.krogerLocation
+      newState.product.locationId = location.locationId
       return newState
     })
 
@@ -161,11 +162,10 @@ const App = () => {
   }
 
   const addToRecipe = async({recipeTitle,product,quantityInRecipe,sizeInRecipe}) => {
-    let newRecipeTitle
+    console.log(recipeTitle)
+    let newRecipeTitle = recipeTitle
     if (recipeTitle === `Make new recipe`) {
       newRecipeTitle = await prompt(`Please enter the title of your recipe.`)
-    } else {
-      newRecipeTitle = recipeTitle
     }
 
     // What info do I need to save in my database?
@@ -205,6 +205,29 @@ const App = () => {
     .catch(e => console.log(e))
   }
 
+  const getPdf = () => {
+    fetch(`${port}/api/getPdf`, {
+      method: "post",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({data: "hello"}),
+    })
+    .then(res => res.blob())
+    .then(res => {
+      // const buffer = new ArrayBuffer(res)
+      const blob = new Blob([res], { type: 'application/pdf' })
+      var url = window.URL.createObjectURL(blob),
+      anchor = document.createElement("a")
+      anchor.href = url
+      anchor.download = "Grocery List"
+      window.open(url)
+      anchor.click()
+      window.URL.revokeObjectURL(blob)
+    })
+    .catch(e => console.log(e))
+  }
+
   const functions = {
     getLocations: getLocations,
     getProducts: getProducts,
@@ -213,7 +236,15 @@ const App = () => {
     handleZipCodeSearchBoxChange: handleZipCodeSearchBoxChange,
     setUserLocation: setUserLocation,
     addToRecipe: addToRecipe,
+    getPdf: getPdf,
   }
+
+  // useLayoutEffect(() => {
+  //   console.log(state)
+  //   getRecipes(getRecipes({username: userInfo.username},searchBox.product,state,functions))
+  // },[userInfo,searchBox])
+
+  console.log(state.searchBox.product)
 
   return (
     <div className="App">
@@ -238,6 +269,7 @@ const App = () => {
             <Link to="/register">Register</Link>
           </nav>
           <button onClick={() => {getRecipes({username: userInfo.username},searchBox.product,state,functions)}}>Get Recipes</button>
+          <button onClick={() => {getPdf()}}>Get PDF</button>
         </header>
         
         <Routes>

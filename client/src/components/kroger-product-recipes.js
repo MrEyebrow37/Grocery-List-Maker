@@ -1,8 +1,6 @@
 import {useState,useEffect,useMemo} from 'react'
 
 const RecipeProduct = ({product,recipe,state,functions}) => {
-    // const quantity = product.quantityInRecipe
-    // const size = product.sizes.find(size => size.size === product.sizeInRecipe)
     let price = useMemo(() => product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe)
     const [imageNumber,setImageNumber] = useState(0)
 

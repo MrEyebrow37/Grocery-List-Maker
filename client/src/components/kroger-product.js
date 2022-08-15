@@ -1,7 +1,8 @@
 import {useState,useEffect} from 'react'
 
 const Product = ({product,state,functions}) => {
-    const [quantity, setQuantity] = useState(1)
+    // console.log(state)
+    const [quantity, setQuantity] = useState(product.sizes[0].originalQuantity)
     const [unit,setUnit] = useState(product.sizes[0].originalSize)
     const [imageNumber,setImageNumber] = useState(0)
 
@@ -97,13 +98,13 @@ const Product = ({product,state,functions}) => {
                     })}
                 </select>
                 to 
-                <select className={`recipeSelector`}>
+                <select className={`recipeSelector id${product.productId}`}>
                     <option>Make new recipe</option>
                     {state.recipes.map((recipe,index) => {
                         return <option key={index}>{recipe.title}</option>
                     })}
                 </select>
-                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.recipeSelector`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
+                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${product.productId}`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
             </details>
         </div>
     )

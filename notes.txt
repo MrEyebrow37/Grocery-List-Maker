@@ -1,1 +1,6 @@
-Need to fix pulling recipes when logging in / something to do with username/krogerlocationid not updating properly
+Need to write function to update recipes to database
+and delete recipes
+
+take quantity state out of product component
+
+fix addToRecipe function querySelector / Should be state

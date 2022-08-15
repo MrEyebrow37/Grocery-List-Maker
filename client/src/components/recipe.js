@@ -3,12 +3,11 @@ import Product from './kroger-product'
 import RecipeProduct from './kroger-product-recipes'
 
 const Recipe = ({recipe,state,functions}) => {
-
-    console.log(recipe)
     
     if (recipe) {
         const totalCost = Object.values(recipe.products).reduce((prev,curr) => {
-            return Number(prev) + Number(curr.quantityInRecipe)*Number(curr.krogerInfo.items[0].price.regular)
+            return Number((curr.sizes.find(size => size.size === curr.sizeInRecipe).pricePerThisSize*curr.quantityInRecipe).toFixed(2))
+            // return Number(prev) + Number(curr.quantityInRecipe)*Number(curr.krogerInfo.items[0].price.regular) This is total price of full item
         },0)
     
         const handleServingsChange = (e,action) => {

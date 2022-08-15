@@ -6,6 +6,7 @@ const CronJob = require('cron').CronJob
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const convert = require('convert-units')
+const PDFDocument = require('pdfkit')
 
 const app = express()
 app.use(cors())
@@ -113,7 +114,6 @@ app.post("/api/recipes",async(req,res) => {
 })
 
 app.post("/api/getRecipes",async(req,res) => {
-    // console.log(req.body)
     const config = {
         database: `grocery-list-maker`,
         collection: `recipes`,
@@ -137,20 +137,13 @@ app.post("/api/getRecipes",async(req,res) => {
         authToken: `Bearer ${krogerConfig.krogerAccessToken}`,
         ...req.body.params,
     })
-    // console.log(products.data[0])
 
     recipeResponse.forEach(recipe => {
         Object.entries(recipe.products).forEach(product => {
             const krogerInfo = products.data.find(krogerProduct => krogerProduct.productId === product[0])
-            console.log(product)
             product[1].krogerInfo = krogerInfo
-            console.log(product)
         })
-        console.log(recipe)
     })
-
-    // console.log(recipeResponse[0])
-
     res.send(recipeResponse)
 })
 
@@ -200,10 +193,20 @@ app.post("/api/setZipCode",async(req,res) => {
     .catch(response => console.log(response))
 })
 
+app.post("/api/getPdf",async(req,res) => {
+    const doc = new PDFDocument
+    doc.pipe(res)
+
+    doc.text("hello")
+
+    doc.end()
+
+})
+
 if (process.env.NODE_ENV === `production`) {
     app.use(express.static(path.join(__dirname,`/client/build`)))
 
-    app.get('/',(req,res) => {
+    app.get('/*',(req,res) => {
         res.sendFile(path.join(__dirname,`client`,`build`,`index.html`))
     })
 }
