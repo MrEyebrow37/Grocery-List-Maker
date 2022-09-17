@@ -8,20 +8,6 @@ const RecipeProduct = ({product,recipe,state,functions}) => {
         price = product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe
     })
 
-
-    let imagePerspective
-    if (product.krogerInfo.images.some(image => image.perspective === `front`)) {
-        imagePerspective = `front`
-    } else if (product.krogerInfo.images.some(image => image.perspective === `top`)) {
-        imagePerspective = `top`
-    } else if (product.krogerInfo.images.some(image => image.perspective === `right`)) {
-        imagePerspective = `right`
-    } else if (product.krogerInfo.images.some(image => image.perspective === `left`)) {
-        imagePerspective = `left`
-    } else if (product.krogerInfo.images.some(image => image.perspective === `back`)) {
-        imagePerspective = `back`
-    }
-
     const sortBy = [`front`,`right`,`back`,`left`,`top`,`bottom`]
 
     const imagesArray = product.krogerInfo.images.flatMap(imagePerspective => {
@@ -75,6 +61,7 @@ const RecipeProduct = ({product,recipe,state,functions}) => {
         await state.setRecipes(prev => {
             const newState = [...prev]
             const foundRecipe = newState.find(stateRecipe => stateRecipe._id === recipe._id)
+            foundRecipe.update = true
             const foundProduct = Object.values(foundRecipe.products).find(stateProduct => stateProduct.krogerInfo.productId === product.krogerInfo.productId)
             if (parameterToChange === `quantity`) {
                 foundProduct.quantityInRecipe = e.target.value
@@ -97,17 +84,20 @@ const RecipeProduct = ({product,recipe,state,functions}) => {
                     <p>Size: {product.krogerInfo.items[0].size}</p>
                 </summary>
                 <input defaultValue={product.quantityInRecipe} onChange ={(e) => {handleProductChange(e,`quantity`)}}></input>
-                <select onChange={(e) => {handleProductChange(e,`size`)}}>
+                <select defaultValue={product.sizeInRecipe} onChange={(e) => {handleProductChange(e,`size`)}}>
                     {product.sizes.map((size,index) => {
-                        if (size.size === product.sizeInRecipe) {
-                            return <option selected key={index}>
-                                {size.size}
-                            </option>
-                        } else {
-                            return <option key={index}>
-                            {size.size}
-                        </option>
-                        }
+                        return <option key={index}>
+                        {size.size}
+                    </option>
+                        // if (size.size === product.sizeInRecipe) {
+                        //     return <option selected key={index}>
+                        //         {size.size}
+                        //     </option>
+                        // } else {
+                        //     return <option key={index}>
+                        //     {size.size}
+                        // </option>
+                        // }
                     })}
                 </select>
                 <p>{price}</p>

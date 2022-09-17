@@ -1,3 +1,119 @@
+:root {
+    --header-height: 4vh;
+    --main-height: 92vh;
+    --footer-height: 4vh;
+
+    --main-background-color: rgb(73,188,255);
+    --alt-background-color: rgb(73,188,255);
+
+    --fancy-background-color: orange;
+    --alt-fancy-background-color: rgb(194, 157, 88);
+
+    --main-button-color: orange;
+    --hover-button-color: rgb(194, 157, 88);
+
+    /* --main-button-color: rgb(88, 233, 235);
+    --hover-button-color: rgb(80, 206, 208); */
+
+    --main-nav-color: white;
+    --hover-nav-color: rgb(230, 230, 230);
+
+    --modal-width: 70;
+    --modal-height: 74;
+
+    --modal-border-width: 2.5;
+
+    --modal-image-width: 20;
+    --modal-image-height: 40;
+    --modal-image-col-start: calc((var(--modal-width) - var(--modal-image-width)) / 2 - var(--modal-border-width));
+    --modal-image-col-end: calc((var(--modal-width) - var(--modal-image-width)) / 2 + var(--modal-image-width) - var(--modal-border-width));
+    --modal-image-row-start: 1;
+    --modal-image-row-end: var(--modal-image-height);
+}
+
+.App {
+    display: grid;
+    grid-template-areas: "header header"
+    "main main"
+    "footer footer";
+}
+
+header {
+    grid-area: header;
+    background-color: var(--main-background-color);
+    display: grid;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    height: var(--header-height);
+    align-items: center;
+    z-index: 10;
+}
+
+main {
+    grid-area: main;
+    z-index: 1;
+    background-color: lightgrey;
+    min-height: var(--main-height);
+    margin-top: var(--header-height);
+}
+
+footer {
+    grid-area: footer;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--footer-height);
+    background-color: var(--main-background-color);
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    z-index: 10;
+}
+
+nav .navLink {
+    margin-right: 10px;
+    color: var(--main-nav-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav .navLink:hover {
+    color: var(--hover-nav-color);
+}
+
+.nonNavLink {
+    color: var(--fancy-background-color);
+    font-weight: bold;
+    /* text-decoration: none; */
+}
+
+.nonNavLink:hover {
+    color: var(--alt-fancy-background-color);
+}
+
+.loginRegisterOuterContainer {
+    display: grid;
+    position: fixed;
+    top: var(--header-height);
+    right: 0;
+    bottom: var(--footer-height);
+    left: 0;
+    align-content: center;
+    justify-content: center;
+}
+
+.loginRegisterInnerContainer {
+    display: grid;
+    grid-template-columns: 175px;
+    background-color: var(--alt-background-color);
+    padding: 90px;
+    border-radius: 25%;
+}
+
 select {
     display: inline;
 }
@@ -10,19 +126,13 @@ details.location {
     border: .5px solid black;
 }
 
-details.locations div {
-    display: inline;
-    position: absolute;
-    cursor: default;
-    background-color: lightblue;
-}
-
 button {
     cursor: pointer;
+    background-color: var(--main-button-color);
 }
 
-nav {
-    display: inline-block;
+button:hover {
+    background-color: var(--hover-button-color);
 }
 
 summary {
@@ -30,21 +140,108 @@ summary {
     cursor: pointer;
 }
 
-.App {
+.dropdown {
+    position: absolute;
+    background-color: lightblue;
+    z-index: 20;
+}
+
+.arrow {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    background-color: inherit;
+    cursor: pointer;
+}
+  
+.right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+  
+.left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+  }
+  
+.up {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+    margin-bottom: -3px;
+}
+  
+.down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+#krogerLocationArrow {
+    margin-left: 10px;
+    color: var(--main-nav-color);
+    border-color: var(--main-nav-color);
+}
+
+.grayScreen {
+    position: fixed;
+    top: 3vh;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+    opacity: .6;
+    z-index: 100;
+}
+
+.productModal {
     display: grid;
-    grid-template-areas: "header header"
-    "main main"
-    "footer footer";
+    align-items: center;
+    justify-content: center;
 }
 
-header {
-    grid-area: header;
+.innerProductModal {
+    opacity: 100%;
+    z-index: 101;
+    position: fixed;
+    top: calc((100vh - calc(var(--modal-height)*1vh)) / 2);
+    right: calc((100vw - calc(var(--modal-width)*1vw)) / 2);
+    bottom: calc((100vh - calc(var(--modal-height)*1vh)) / 2);
+    left: calc((100vw - calc(var(--modal-width)*1vw)) / 2);
+    background-color: white;
+    border: solid calc(var(--modal-border-width) * 1vw) var(--main-background-color);
+    border-radius: 15%;
+    display: grid;
+    justify-items: center;
+    grid-template-columns: repeat(var(--modal-width),1vw);
+    grid-template-rows: repeat(var(--modal-height), 1vh);
 }
 
-main {
-    grid-area: main;
+.productModalImage {
+    grid-area: var(--modal-image-row-start) / var(--modal-image-col-start) / var(--modal-image-row-end) / var(--modal-image-col-end);
+    width: calc(var(--modal-image-width)*1vw);
+    height: calc(var(--modal-image-height)*1vh);
 }
 
-footer {
-    grid-area: footer;
+.productModalLeftButton {
+    grid-area: var(--modal-image-row-start)/calc(var(--modal-image-col-start) - 2)/var(--modal-image-row-end)/calc(var(--modal-image-col-start) );
+}
+
+.productModalRightButton {
+    grid-area: var(--modal-image-row-start)/calc(var(--modal-image-col-end) )/var(--modal-image-row-end)/calc(var(--modal-image-col-end) + 2);
+}
+
+.productModalDescription {
+    grid-area: calc(var(--modal-image-row-end) + 2) / var(--modal-image-col-start) / calc(var(--modal-image-row-end) + 2) / var(--modal-image-col-end);
+}
+
+.productModalCloseModal {
+    grid-area: 1/52/3/54;
+}
+
+.hide {
+    display: none;
 }

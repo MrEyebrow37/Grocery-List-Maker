@@ -1,4 +1,6 @@
 const getRecipes = (filter,params,state,functions) => {
+  console.log(filter,params,state)
+  console.log(filter)
     fetch(`${state.port}/api/getRecipes`, {
       method: "post",
       headers: {

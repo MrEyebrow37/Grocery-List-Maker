@@ -1,6 +1,23 @@
-Need to write function to update recipes to database
-and delete recipes
+intl numbers for $$
+
+update state in delete recipe function
 
 take quantity state out of product component
 
-fix addToRecipe function querySelector / Should be state
+make sizes for bottles/ct etc...
+
+make pdf with list
+
+
+
+validate login/register data (username,password,email,etc)
+
+cookies to keep login
+
+usecontext for user auth
+
+return server status for post requests
+
+
+
+done: hash passwords and store hash

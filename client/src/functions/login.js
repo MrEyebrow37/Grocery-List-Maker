@@ -1,19 +1,12 @@
 const login = async(params,state,functions) => {
 
-    const operations = {
-      insertOne: {
-        document: params
-      }
-    }
-
-    const filter = {
-      username: params.username
-    }
+    const loginBox = {...state.setLoginBox}
+    state.setLoginBox({username: ``,password: ``,})
 
     const data = {
-      operations: operations,
-      filter: filter,
-      params: params,
+      params,
+      username: params.username,
+      password: params.password,
     }
 
     await fetch(`${state.port}/api/login`, {
@@ -32,12 +25,10 @@ const login = async(params,state,functions) => {
             newState.product.locationId = res.krogerLocation
             return newState
           })
+          functions.getRecipes({username: res.username},{...state.searchBox.product,locationId: res.krogerLocation},state,functions)
         } else {
           console.log(res)
         }
-        functions.getRecipes({username: document.querySelector(`.username`).value},{...state.searchBox.product,locationId: res.krogerLocation},state,functions)
-        document.querySelector(`.password`).value = ''
-        document.querySelector(`.username`).value = ''
       })
       .catch(e => console.log(e))
 }

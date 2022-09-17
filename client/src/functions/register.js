@@ -1,18 +1,11 @@
 const register = async(params,state,functions) => {
 
-    const operations = {
-      insertOne: {
-        document: params
-      }
-    }
-
-    const filter = {
-      username: params.username
-    }
+    state.setRegisterBox({username: ``,password: ``,})
 
     const data = {
-      operations: operations,
-      filter: filter,
+      params,
+      username: params.username,
+      password: params.password,
     }
 
     await fetch(`${state.port}/api/register`, {
@@ -25,8 +18,6 @@ const register = async(params,state,functions) => {
       .then(res => res.json())
       .then(res => {
         console.log(res)
-        document.querySelector(`.password`).value = ''
-        document.querySelector(`.username`).value = ''
       })
       .catch(e => console.log(e))
 }

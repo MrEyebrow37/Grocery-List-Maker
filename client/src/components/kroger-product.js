@@ -1,23 +1,10 @@
 import {useState,useEffect} from 'react'
 
 const Product = ({product,state,functions}) => {
-    // console.log(state)
+    // console.log(product)
     const [quantity, setQuantity] = useState(product.sizes[0].originalQuantity)
     const [unit,setUnit] = useState(product.sizes[0].originalSize)
     const [imageNumber,setImageNumber] = useState(0)
-
-    let imagePerspective
-    if (product.images.some(image => image.perspective === `front`)) {
-        imagePerspective = `front`
-    } else if (product.images.some(image => image.perspective === `top`)) {
-        imagePerspective = `top`
-    } else if (product.images.some(image => image.perspective === `right`)) {
-        imagePerspective = `right`
-    } else if (product.images.some(image => image.perspective === `left`)) {
-        imagePerspective = `left`
-    } else if (product.images.some(image => image.perspective === `back`)) {
-        imagePerspective = `back`
-    }
 
     const sortBy = [`front`,`right`,`back`,`left`,`top`,`bottom`]
 
@@ -70,18 +57,24 @@ const Product = ({product,state,functions}) => {
 
     return (
         <div>
-            <details>
-                <summary>
-                    <button onClick={() => {handleImageChange(`left`,imagesArray.length)}}>{`<`}</button>
-                    <img src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
-                    <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
-                    <br/>
-                    <p>{`${product.description} $${product.items[0].price.regular}`}</p>
-                    <p>Size: {product.items[0].size}</p>
-                </summary>
-                Add
-                <input defaultValue={quantity} placeHolder={`Quantity`} onChange={(e) => {setQuantity(e.target.value)}}></input>
-                <select defaultValue={unit} onChange={(e) => {setUnit(e.target.value)}}>
+                
+            <div>
+
+                <button onClick={() => {handleImageChange(`left`,imagesArray.length)}}>{`<`}</button>
+                <img onClick={(e) => {
+                    functions.toggleProductModal(e)
+                    state.setSelectedProduct(product)
+                    state.setImageNumber(imageNumber)
+                }} className={`cursor-pointer`} src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
+                <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
+                <p>{`${product.description}`}</p>
+                <p>{`$${product.items[0].price.regular}`}</p>
+                <p>Size: {product.items[0].size}</p>
+                
+
+                {/* Add
+                <input defaultValue={quantity} placeholder={`Quantity`} onChange={(e) => {setQuantity(e.target.value)}}></input>
+                <select onChange={(e) => {setUnit(e.target.value)}}>
                     {product.sizes.map((size,index) => {
                         // return <option key={index}>
                         //     {size.size}
@@ -104,8 +97,8 @@ const Product = ({product,state,functions}) => {
                         return <option key={index}>{recipe.title}</option>
                     })}
                 </select>
-                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${product.productId}`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
-            </details>
+                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${product.productId}`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button> */}
+            </div>
         </div>
     )
 }

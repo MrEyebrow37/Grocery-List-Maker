@@ -7,6 +7,8 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const convert = require('convert-units')
 const PDFDocument = require('pdfkit')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 
 const app = express()
 app.use(cors())
@@ -66,13 +68,13 @@ app.post("/api/products", async(req,res) => {
                 return {
                     originalQuantity: originalQuantity,
                     originalSize: `fl-oz`,
-                    originalPrice: 0,
+                    originalPrice: product.items[0].price.regular,
                 }
             } else if (sizeArray[1] === `pt` || sizeArray[1] === `pint`) {
                 return {
                     originalQuantity: originalQuantity,
                     originalSize: `pnt`,
-                    originalPrice: 0,
+                    originalPrice: product.items[0].price.regular,
                 }
             } else {
                 return {
@@ -91,12 +93,20 @@ app.post("/api/products", async(req,res) => {
                     return {...size,
                         size: possible,
                         conversionFraction: Number(conversionFraction),
-                        pricePerThisSize: Number((size.originalPrice/conversionFraction/size.originalQuantity).toFixed(2)),
-                        pricePerOriginalSize: Number((size.originalPrice/size.originalQuantity).toFixed(2)),
+                        pricePerThisSize: Number((size.originalPrice/conversionFraction/size.originalQuantity)),
+                        pricePerOriginalSize: Number((size.originalPrice/size.originalQuantity)),
                     }
                 })
                 return newPossibleSizes
-            }
+            } 
+            // else if (size.originalSize !== (`12pk`)) {
+            //     return {...size,
+            //         size: size.originalSize,
+            //         conversionFraction: Number((1/size.originalQuantity).toFixed(2)),
+            //         pricePerThisSize: Number((size.originalPrice/(1/size.originalQuantity)/size.originalQuantity).toFixed(2)),
+            //         pricePerOriginalSize: Number((size.originalPrice/size.originalQuantity).toFixed(2)),
+            //     }
+            // }
         })
         product.sizes = newSizes
     })
@@ -139,6 +149,7 @@ app.post("/api/getRecipes",async(req,res) => {
     })
 
     recipeResponse.forEach(recipe => {
+        recipe.update = false
         Object.entries(recipe.products).forEach(product => {
             const krogerInfo = products.data.find(krogerProduct => krogerProduct.productId === product[0])
             product[1].krogerInfo = krogerInfo
@@ -147,39 +158,105 @@ app.post("/api/getRecipes",async(req,res) => {
     res.send(recipeResponse)
 })
 
-app.post("/api/register",async(req,res) => {
-    console.log("register")
+app.post("/api/updateRecipes",async(req,res) => {
+    // console.log(req.body)
     const config = {
         database: `grocery-list-maker`,
-        collection: `users`,
-        filter: req.body.filter,
-        operations: [req.body.operations],
+        collection: `recipes`,
+        operations: req.body.map(recipe => {
+            return {
+                updateOne: {
+                    filter: {title: `${recipe.title}`},
+                    update: {$set: {title: recipe.title, products: recipe.products, recipe: recipe.servings}},
+                }
+            }
+        })
     }
+    const response = await bulkOperate(config)
+    res.send(response)
+})
+
+app.delete("/api/deleteRecipe",async(req,res) => {
+    // console.log(req.body)
+    const config = {
+        database: `grocery-list-maker`,
+        collection: `recipes`,
+        operations: [{deleteOne: {
+            filter: {title: `${req.body.title}`}
+        }}]
+    }
+    const response = await bulkOperate(config)
+    res.send(response)
+})
+
+app.post("/api/register",async(req,res) => {
+
+    const username = req.body.username
+    const plaintextPassword = req.body.password
+
+    const filter = {
+        username,
+    }
+
+    let config  = {
+        database: `grocery-list-maker`,
+        collection: `users`,
+        filter,
+    }
+
     const exists = await find(config)
     if (exists[0]) {
         res.send({response: "This username already exists. Please choose a different one."})
     } else {
-        const response = await bulkOperate(config)
-        res.send(response)
+        await bcrypt.hash(plaintextPassword, saltRounds, async function(err, hash) {
+            const operations = [{
+                insertOne: {
+                    document: {...req.body.params, password: hash}
+                }
+            }]
+
+            config = {
+                database: `grocery-list-maker`,
+                collection: `users`,
+                filter,
+                operations,
+            }
+
+            const response = await bulkOperate(config)
+            res.send(response)
+        })
     }
 })
 
 app.post("/api/login",async(req,res) => {
-    console.log("login")
-    const config = {
+
+    const plaintextPassword = req.body.password
+    const username = req.body.username
+
+    const filter = {
+        username,
+    }
+
+    let config = {
         database: `grocery-list-maker`,
         collection: `users`,
-        filter: req.body.filter,
-        operations: [req.body.operations],
+        filter,
     }
+
     const exists = await find(config)
-    if (exists[0] && req.body.params.password === exists[0].password) {
-        res.send({response: "Success!",krogerLocation: exists[0].krogerLocation})
-    } else if (exists[0] && req.body.params.password !== exists[0].password) {
-        res.send({response: "Sorry, the username and password didn't match. Please try again."})
+    if (exists[0]) {
+        await bcrypt.compare(plaintextPassword, exists[0].password, async function(err, result) {
+            if (result) {
+                res.send({response: "Success!",krogerLocation: exists[0].krogerLocation, username,})
+            } else if (!result) {
+                res.send({response: "Sorry, the username and password didn't match. Please try again."})
+            }
+        })
     } else {
         res.send({response: "Sorry, the username you entered doesn't exist. Please try again."})
     }
+
+
 })
 
 app.post("/api/setZipCode",async(req,res) => {
@@ -194,13 +271,17 @@ app.post("/api/setZipCode",async(req,res) => {
 })
 
 app.post("/api/getPdf",async(req,res) => {
+    const list = req.body.recipes.flatMap(recipe => {
+        return Object.values(recipe.products).map(product => {
+            return {...product,title: recipe.title,}
+        })
+    })
     const doc = new PDFDocument
     doc.pipe(res)
-
-    doc.text("hello")
-
+    list.forEach(product => {
+        doc.fontSize(10).text(`${product.krogerInfo.aisleLocations[0].description}`,{continued: true}).fontSize(8).text(`-${product.title}`)
+    })
     doc.end()
-
 })
 
 if (process.env.NODE_ENV === `production`) {

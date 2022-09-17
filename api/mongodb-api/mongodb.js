@@ -10,9 +10,11 @@ const bulkOperate = async({database, collection, operations}) => {
         await client.connect()
         const coll = client.db(`${database}`).collection(`${collection}`)
         const response = await coll.bulkWrite(operations)
+        console.log(response)
         return response.result
     } catch (e) {
-        return e.result.result
+        // console.log(e)
+        return e
     } finally {
         await client.close
     }
