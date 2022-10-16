@@ -15,8 +15,10 @@
     /* --main-button-color: rgb(88, 233, 235);
     --hover-button-color: rgb(80, 206, 208); */
 
-    --main-nav-color: white;
-    --hover-nav-color: rgb(230, 230, 230);
+    --main-text-color: white;
+    ----main-hover-text-color: rgb(230, 230, 230);
+
+
 
     --modal-width: 70;
     --modal-height: 74;
@@ -29,6 +31,8 @@
     --modal-image-col-end: calc((var(--modal-width) - var(--modal-image-width)) / 2 + var(--modal-image-width) - var(--modal-border-width));
     --modal-image-row-start: 1;
     --modal-image-row-end: var(--modal-image-height);
+
+    --canvasColor: white;
 }
 
 .App {
@@ -76,13 +80,13 @@ footer {
 
 nav .navLink {
     margin-right: 10px;
-    color: var(--main-nav-color);
+    color: var(--main-text-color);
     text-decoration: none;
     font-weight: bold;
 }
 
 nav .navLink:hover {
-    color: var(--hover-nav-color);
+    color: var(----main-hover-text-color);
 }
 
 .nonNavLink {
@@ -129,6 +133,8 @@ details.location {
 button {
     cursor: pointer;
     background-color: var(--main-button-color);
+    border-radius: 10px;
+    padding: 1px;
 }
 
 button:hover {
@@ -176,14 +182,10 @@ summary {
     -webkit-transform: rotate(45deg);
 }
 
-.cursor-pointer {
-    cursor: pointer;
-}
-
 #krogerLocationArrow {
     margin-left: 10px;
-    color: var(--main-nav-color);
-    border-color: var(--main-nav-color);
+    color: var(--main-text-color);
+    border-color: var(--main-text-color);
 }
 
 .grayScreen {
@@ -202,6 +204,8 @@ summary {
     align-items: center;
     justify-content: center;
 }
+
+/*  grid-area: rowStart colStart rowEnd colEnd;  */
 
 .innerProductModal {
     opacity: 100%;
@@ -238,10 +242,98 @@ summary {
     grid-area: calc(var(--modal-image-row-end) + 2) / var(--modal-image-col-start) / calc(var(--modal-image-row-end) + 2) / var(--modal-image-col-end);
 }
 
+.productInfo {
+    display: grid;
+    justify-content: start;
+    grid-area: 5/1/60/11;
+    width: 10vw;
+    border: 1px solid black;
+}
+
+.recipeInfo {
+    display: grid;
+    grid-template-columns: 9vw;
+    justify-content: start;
+    grid-area: 5/12/60/22;
+    width: 9vw;
+    border: 1px solid black;
+}
+
+
+.productModalRegPrice {
+    height: auto;
+}
+
+.productModalSize {
+    /* grid-area: 6/3/6/3; */
+    height: auto;
+}
+
+.productModalQuantity {
+    /* grid-area: 15/3/17/3; */
+    height: fit-content;
+    width: 3vw;
+}
+
+.productModalUnit {
+    /* grid-area: 18/3/20/3; */
+    height: fit-content;
+    width: 3vw;
+}
+
+.productModalRecipeSelector {
+    /* grid-area: 22/3/24/3; */
+    height: fit-content;
+    width: 9vw;
+}
+
+.productModalAddToRecipe {
+    /* grid-area: 26/3/30/3; */
+}
+
 .productModalCloseModal {
-    grid-area: 1/52/3/54;
+    grid-area: 3/60/6/60;
+    width: 2vw;
+}
+
+
+.notificationWrapper {
+    position: fixed;
+    right: 20px;
+    bottom: calc(var(--footer-height) + 50px);
+    z-index: 1000;
+}
+
+.notification {
+    display: grid;
+    padding: 0 10px;
+    margin: 5px 0 0 0;
+    border-radius: 10px;
+    background-color: red;
+    min-width: 30vw;
+    min-height: var(--footer-height);
+    grid-template-columns: 10fr 1fr ;
+    grid-template-rows: var(--footer-height);
+    align-items: center;
+}
+
+.notificationButton {
+    font-weight: bold;
+    color: white;
+    background-color: gray;
+}
+
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 .hide {
     display: none;
+}
+
+#canvas {
+    border: 1px solid gray;
+    border-radius: 10px;
+    background-color: var(--canvasColor);
 }

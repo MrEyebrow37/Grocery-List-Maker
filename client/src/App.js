@@ -2,17 +2,22 @@ import './App.css'
 import Product from './components/kroger-product'
 import Location from './components/kroger-location'
 import Recipe from './components/recipe'
+import Notification from './components/notification'
 import RecipeProduct from './components/kroger-product-recipes'
+import Canvas from './components/canvas'
 import {useEffect, useState,useLayoutEffect,useMemo} from 'react'
 import {BrowserRouter as Router,Routes,Route,Link,useNavigate} from "react-router-dom"
 // Import functions
 import login from './functions/login'
 import register from './functions/register'
+import displayNotification from './functions/displayNotification'
 import {getRecipes} from './functions/recipes'
+
 
 const App = () => {
 
   let port = `http://localhost:4040`
+  // port = `https://kroger-grocery-list-maker.herokuapp.com`
   if (process.env.NODE_ENV === `production`) {
     port = `https://kroger-grocery-list-maker.herokuapp.com`
     // setPort(`http://localhost:4040`)
@@ -45,6 +50,8 @@ const App = () => {
   })
   const [loginBox,setLoginBox] = useState({username: ``,password: ``,})
   const [registerBox,setRegisterBox] = useState({username: ``,password: ``,})
+
+  const [notifications, setNotifications] = useState([])
 
   const [selectedProduct,setSelectedProduct] = useState()
   const [imageNumber,setImageNumber] = useState(0)
@@ -103,6 +110,10 @@ const App = () => {
     }).sort((a,b) => sortBy.indexOf(a.perspective) - sortBy.indexOf(b.perspective))
   }
 
+  console.log(searchBox.product)
+
+  // console.log(selectedProduct)
+
   const state = {
     port: port,
     userInfo: userInfo,
@@ -123,6 +134,8 @@ const App = () => {
     setSelectedProduct: setSelectedProduct,
     imageNumber: imageNumber,
     setImageNumber: setImageNumber,
+    notifications: notifications,
+    setNotifications: setNotifications,
   }
 
   // Functions ///////////////////////////////////////////////////////////////////////////
@@ -150,8 +163,14 @@ const App = () => {
 
   const getProducts = (params) => {
     if (!params.locationId) {
-      alert("Please choose a Kroger Location to search for products.")
-    } else if (params.term.length >= 3) {
+      setNotifications(prevState => {
+        return [...prevState,{notification: `Please choose a Kroger Location to search for products.`, type: "error"}]
+      })
+    } else if (params.term.length < 3) {
+      setNotifications(prevState => {
+        return [...prevState,{notification: `Your search term must be greater than 2 characters.`, type: "error"}]
+      })
+    } else {
       fetch(`${port}/api/products`, {
         method: "post",
         headers: {
@@ -164,8 +183,6 @@ const App = () => {
         setProducts(res.data)
       })
       .catch(e => console.log(e))
-    } else {
-      alert("Your search term must be greater than 2 characters.")
     }
   }
 
@@ -358,7 +375,7 @@ const App = () => {
         target2.classList.remove(`productModal`)
         target2.classList.add(`hide`)
     }
-}
+  }
 
   // const login = async(params,state,functions) => {
 
@@ -446,11 +463,18 @@ const App = () => {
             <Link className={`navLink`} to="/recipes">Recipes</Link>
             <Link className={`navLink`} to="/login">Login</Link>
             <Link className={`navLink`} to="/register">Register</Link>
+            <Link className={`navLink`} to="/canvas">Canvas</Link>
           </nav>
           <div></div>
           {/* <button onClick={() => {getRecipes({username: userInfo.username},searchBox.product,state,functions)}}>Get Recipes</button> */}
           {/* <button onClick={() => {getPdf()}}>Get PDF</button> */}
         </header>
+
+        <div className={`notificationWrapper`}>
+              {notifications ? notifications.map((notification,index) => {
+                return <Notification key={index} index={index} state={state} functions={functions} notification={notification}></Notification>
+              }) : <div></div>}
+        </div>
         
         <Routes>
 
@@ -483,7 +507,13 @@ const App = () => {
           <Route path="/recipes" element={
             <main>
               {recipes ? recipes.map((recipe,index) => <Recipe state={state} functions={functions} recipe={recipe} key={index}></Recipe>) : <p>Sorry, no recipes found</p>}
-              <button onClick={(e) => updateRecipes(e)}>Update Recipes</button>
+              {recipes ? <button onClick={(e) => updateRecipes(e)}>Update Recipes</button> : <div></div>}
+            </main>
+          }></Route>
+
+          <Route path="/canvas" element={
+            <main>
+              <Canvas />
             </main>
           }></Route>
 
@@ -497,33 +527,56 @@ const App = () => {
                         <button className={`productModalRightButton`} onClick={(e) => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
                         <button className={`productModalCloseModal`} onClick={(e) => {toggleProductModal(e)}}>X</button>
                         <p className={`productModalDescription`}>{`${selectedProduct.description}`}</p>
-                        <p>{`$${selectedProduct.items[0].price.regular}`}</p>
-                        <p>Size: {selectedProduct.items[0].size}</p>
-                        <input defaultValue={quantity} placeholder={`Quantity`} onChange={(e) => {quantity = e.target.value}}></input>
-                        <select onChange={(e) => {unit = e.target.value}}>
-                            {selectedProduct.sizes.map((size,index) => {
-                                // return <option key={index}>
-                                //     {size.size}
-                                // </option>
-                                if (size.size === size.originalSize) {
-                                    return <option selected key={index}>
-                                        {size.size}
-                                    </option>
-                                } else {
-                                    return <option key={index}>
-                                      {size.size}
-                                  </option>
-                                }
-                            })}
-                        </select>
-                        to 
-                        <select className={`recipeSelector id${selectedProduct.productId}`}>
-                            <option>Make new recipe</option>
-                            {state.recipes.map((recipe,index) => {
-                                return <option key={index}>{recipe.title}</option>
-                            })}
-                        </select>
-                        <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${selectedProduct.productId}`).value, product: selectedProduct, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
+                        <div className={`productInfo`}>
+                          <p className={`productModalRegPrice`}>{`Regular Price: $${selectedProduct.items[0].price.regular}`}</p>
+                          <p className={`productModalSize`}>Size: {selectedProduct.items[0].size}</p>
+                        </div>
+                        <div className={`recipeInfo`}>
+
+                          <div className={`productModalQuantity`}>
+                            <p>Quantity:</p>
+                            <input defaultValue={quantity} placeholder={`Quantity`} onChange={(e) => {quantity = e.target.value}}></input>
+                          </div>
+
+                          <div className={`productModalUnit`}>
+                            <p>Unit</p>
+                            <select onChange={(e) => {unit = e.target.value}}>
+                                {selectedProduct.sizes.map((size,index) => {
+                                    // return <option key={index}>
+                                    //     {size.size}
+                                    // </option>
+                                    if (size.size === size.originalSize) {
+                                        return <option selected key={index}>
+                                            {size.size}
+                                        </option>
+                                    } else {
+                                        return <option key={index}>
+                                          {size.size}
+                                      </option>
+                                    }
+                                })}
+                            </select>
+                          </div>
+
+                          <div className={`productModalRecipePrice`}>
+                            <p>{`${selectedProduct.items[0].price.regular}`}</p>
+                          </div>
+
+                          <div className={`productModalRecipeSelector`}>
+                            <p>Recipe:</p>
+                            <select className={`recipeSelector id${selectedProduct.productId}`}>
+                                <option>Make new recipe</option>
+                                {state.recipes.map((recipe,index) => {
+                                    if (recipe.title) {
+                                      return <option key={index}>{recipe.title}</option>
+                                    } else {
+                                      return
+                                    }
+                                })}
+                            </select>
+                          </div>
+                          <button className={`productModalAddToRecipe`} onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${selectedProduct.productId}`).value, product: selectedProduct, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button>
+                        </div>
                     </div>}
                 </div>
 
