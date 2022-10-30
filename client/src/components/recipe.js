@@ -1,6 +1,6 @@
 import {useState} from 'react'
 import Product from './kroger-product'
-import RecipeProduct from './kroger-product-recipes'
+import RecipeProduct from './recipe-product'
 
 const Recipe = ({recipe,state,functions}) => {
 
@@ -26,20 +26,22 @@ const Recipe = ({recipe,state,functions}) => {
     }
 
     return (
-        <details>
-            <summary>
-                <p>{recipe.title}</p>
-                <p>Total cost: ${Number(totalCost.toFixed(2))}</p>
+        <div className={`recipe`}>
+            <p className={`recipeTitle cursor-pointer`} onClick={(e) => {
+                state.setSelectedRecipe(recipe)
+                functions.toggleModal(e,`recipeModal`)
+            }}>{recipe.title}</p>
+            <p className={`recipeTotalCost`}>Total cost: ${Number(totalCost.toFixed(2))}</p>
+            <div className={`recipeServings`}>
                 <p>Servings: {recipe.servings}</p>
                 <button onClick={(e) => {handleServingsChange(e,`subtract`)}}>-</button>
                 <button onClick={(e) => {handleServingsChange(e,`add`)}}>+</button>
-                <p>Cost per serving: ${(totalCost/recipe.servings).toFixed(2)}</p>
-                <button onClick={(e) => {functions.deleteRecipes(e,recipe)}}>Delete</button>
-            </summary>
-            {Object.values(recipe.products).map((product,index) => {
-                return <RecipeProduct recipe={recipe} product={product} state={state} functions={functions} key={index}></RecipeProduct>
-            })}
-        </details>
+                <p className={`extraInfo`} title={`Cost per Serving`}>&#63;</p>
+                <p>CPS: ${(totalCost/recipe.servings).toFixed(2)}</p>
+            </div>
+            <button onClick={(e) => {functions.deleteRecipes(e,recipe)}}>Delete</button>
+            <div className={`productSpacer`}></div>
+        </div>
     )
 }
 

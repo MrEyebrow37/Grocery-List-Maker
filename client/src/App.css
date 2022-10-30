@@ -16,23 +16,50 @@
     --hover-button-color: rgb(80, 206, 208); */
 
     --main-text-color: white;
-    ----main-hover-text-color: rgb(230, 230, 230);
+    --main-hover-text-color: rgb(230, 230, 230);
 
 
 
-    --modal-width: 70;
-    --modal-height: 74;
+    --product-modal-width: 70;
+    --product-modal-height: 74;
+
+    --recipe-modal-width: 70;
+    --recipe-modal-height: 74;
 
     --modal-border-width: 2.5;
 
     --modal-image-width: 20;
     --modal-image-height: 40;
-    --modal-image-col-start: calc((var(--modal-width) - var(--modal-image-width)) / 2 - var(--modal-border-width));
-    --modal-image-col-end: calc((var(--modal-width) - var(--modal-image-width)) / 2 + var(--modal-image-width) - var(--modal-border-width));
+    --modal-image-col-start: calc((var(--product-modal-width) - var(--modal-image-width)) / 2 - var(--modal-border-width));
+    --modal-image-col-end: calc((var(--product-modal-width) - var(--modal-image-width)) / 2 + var(--modal-image-width) - var(--modal-border-width));
     --modal-image-row-start: 1;
     --modal-image-row-end: var(--modal-image-height);
 
     --canvasColor: white;
+}
+
+body {
+    font-size: large;
+}
+
+input {
+    border: 1px solid var(--main-background-color);
+    height: 40px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 1px gray;
+    text-align: center;
+}
+
+select {
+    border: 1px solid var(--main-background-color);
+    height: 40px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 1px gray;
+    text-align: center;
+}
+
+input::placeholder {
+    color: rgb(125, 171, 198);
 }
 
 .App {
@@ -44,16 +71,18 @@
 
 header {
     grid-area: header;
-    background-color: var(--main-background-color);
     display: grid;
+    grid-template-columns: .1fr .2fr .4fr;
+    align-items: center;
+    justify-items: center;
+    background-color: var(--main-background-color);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    grid-template-columns: 1.5fr 1fr 1fr;
     height: var(--header-height);
-    align-items: center;
     z-index: 10;
+    box-shadow: 0px 2px 1px gray;
 }
 
 main {
@@ -61,7 +90,7 @@ main {
     z-index: 1;
     background-color: lightgrey;
     min-height: var(--main-height);
-    margin-top: var(--header-height);
+    padding: calc(var(--header-height)*1.5) 0;
 }
 
 footer {
@@ -78,15 +107,16 @@ footer {
     z-index: 10;
 }
 
-nav .navLink {
+.navLink {
     margin-right: 10px;
     color: var(--main-text-color);
     text-decoration: none;
     font-weight: bold;
+    cursor: pointer;
 }
 
-nav .navLink:hover {
-    color: var(----main-hover-text-color);
+.navLink:hover {
+    color: var(--main-hover-text-color);
 }
 
 .nonNavLink {
@@ -126,8 +156,16 @@ p {
     display: inline;
 }
 
-details.location {
-    border: .5px solid black;
+.location {
+    border: 2px solid var(--main-background-color);
+    margin: 5px;
+    border-radius: 10px;
+    padding: 10px;
+    /* background-color: rgb(239, 239, 239); */
+}
+
+.locationName {
+    text-decoration: underline;
 }
 
 button {
@@ -135,6 +173,13 @@ button {
     background-color: var(--main-button-color);
     border-radius: 10px;
     padding: 1px;
+    box-shadow: 2px 2px 2px gray;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: large;
+    padding: 0 4px;
+    height: 40px;
 }
 
 button:hover {
@@ -146,10 +191,17 @@ summary {
     cursor: pointer;
 }
 
+.locationsSelector {
+    margin-left: 60px;
+}
+
 .dropdown {
     position: absolute;
-    background-color: lightblue;
+    background-color: white;
     z-index: 20;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 5px 5px 10px gray;
 }
 
 .arrow {
@@ -188,9 +240,146 @@ summary {
     border-color: var(--main-text-color);
 }
 
+#krogerLocationArrow:hover {
+    border-color: var(--main-hover-text-color);
+}
+
+.mainHome {
+    display: grid;
+    justify-content: center;
+}
+
+.productWrapper {
+    display: grid;
+    background-color: white;
+    border-radius: 10px;
+    width: 33vw;
+    min-height: 100vh;
+}
+
+.krogerProduct {
+    display: grid;
+    align-items: center;
+    padding: 10px;
+    justify-items: center;
+}
+
+.krogerProductHeader {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+}
+
+.krogerProductHeader button {
+    width: 40px;
+}
+
+.productDescription {
+    display: inline-block;
+    background-color: var(--main-background-color);
+    padding: 7px;
+    box-shadow: 2px 2px 2px gray;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.productDetails {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+}
+
+.productDetails p {
+    background-color: var(--main-background-color);
+    padding: 7px;
+    box-shadow: 2px 2px 2px gray;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.productSpacer {
+    background-color: lightgray;
+    width: 80%;
+    height: 10px;
+    border-radius: 4px;
+    margin: 20px;
+}
+
+.mainRecipes {
+    display: grid;
+    justify-content: center;
+}
+
+.recipeWrapper {
+    display: grid;
+    background-color: white;
+    border-radius: 10px;
+    width: 33vw;
+}
+
+.recipe {
+    display: grid;
+    justify-items: center;
+}
+
+.recipeTitle {
+    display: inline-block;
+    background-color: var(--main-background-color);
+    padding: 7px;
+    box-shadow: 2px 2px 2px gray;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    width: fit-content;
+    height: fit-content;
+}
+
+.recipeTotalCost {
+    display: inline-block;
+    background-color: var(--main-background-color);
+    padding: 7px;
+    box-shadow: 2px 2px 2px gray;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    width: fit-content;
+    height: fit-content;
+}
+
+.recipeServings * {
+    margin: 5px;
+}
+
+
+.mainList {
+    display: grid;
+    justify-content: center;
+}
+
+.listWrapper {
+    display: grid;
+    background-color: white;
+    border-radius: 10px;
+    width: 33vw;
+}
+
+.extraInfo {
+    border-radius: 100%;
+    font-weight: bold;
+    margin-right: 0px;
+    background-color: var(--main-background-color);
+    padding: 3px 5px;
+    color: white;
+}
+
 .grayScreen {
     position: fixed;
-    top: 3vh;
+    top: 0;
     right: 0;
     bottom: 0;
     left: 0;
@@ -211,17 +400,17 @@ summary {
     opacity: 100%;
     z-index: 101;
     position: fixed;
-    top: calc((100vh - calc(var(--modal-height)*1vh)) / 2);
-    right: calc((100vw - calc(var(--modal-width)*1vw)) / 2);
-    bottom: calc((100vh - calc(var(--modal-height)*1vh)) / 2);
-    left: calc((100vw - calc(var(--modal-width)*1vw)) / 2);
+    top: calc((100vh - calc(var(--product-modal-height)*1vh)) / 2);
+    right: calc((100vw - calc(var(--product-modal-width)*1vw)) / 2);
+    bottom: calc((100vh - calc(var(--product-modal-height)*1vh)) / 2);
+    left: calc((100vw - calc(var(--product-modal-width)*1vw)) / 2);
     background-color: white;
     border: solid calc(var(--modal-border-width) * 1vw) var(--main-background-color);
     border-radius: 15%;
     display: grid;
     justify-items: center;
-    grid-template-columns: repeat(var(--modal-width),1vw);
-    grid-template-rows: repeat(var(--modal-height), 1vh);
+    grid-template-columns: repeat(var(--product-modal-width),1vw);
+    grid-template-rows: repeat(var(--product-modal-height), 1vh);
 }
 
 .productModalImage {
@@ -294,6 +483,37 @@ summary {
 .productModalCloseModal {
     grid-area: 3/60/6/60;
     width: 2vw;
+}
+
+
+.recipeModal {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+/*  grid-area: rowStart colStart rowEnd colEnd;  */
+
+.innerRecipeModal {
+    /* opacity: 100%; */
+    z-index: 101;
+    position: fixed;
+    top: calc((100vh - calc(var(--recipe-modal-height)*1vh)) / 2);
+    right: calc((100vw - calc(var(--recipe-modal-width)*1vw)) / 2);
+    bottom: calc((100vh - calc(var(--recipe-modal-height)*1vh)) / 2);
+    left: calc((100vw - calc(var(--recipe-modal-width)*1vw)) / 2);
+    background-color: white;
+    border: solid calc(var(--modal-border-width) * .5vw) var(--main-background-color);
+    border-radius: 15%;
+    justify-items: center;
+    grid-template-columns: repeat(var(--recipe-modal-width),1vw);
+    grid-template-rows: repeat(var(--recipe-modal-height), 1vh);
+    overflow: scroll;
+    padding: 20px;
+}
+
+.productImage {
+    background-color: white;
 }
 
 

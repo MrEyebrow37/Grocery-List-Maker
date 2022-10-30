@@ -3,10 +3,11 @@ import {useState,useEffect,useMemo} from 'react'
 const RecipeProduct = ({product,recipe,state,functions}) => {
     let price = useMemo(() => product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe)
     const [imageNumber,setImageNumber] = useState(0)
-
-    useEffect(() => {
-        price = product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe
-    })
+    // console.log(product)
+    // console.log(recipe)
+    // useEffect(() => {
+    //     price = product.sizes.find(size => size.size === product.sizeInRecipe).pricePerThisSize*product.quantityInRecipe
+    // })
 
     const sortBy = [`front`,`right`,`back`,`left`,`top`,`bottom`]
 
@@ -73,35 +74,50 @@ const RecipeProduct = ({product,recipe,state,functions}) => {
     }
 
     return (
-        <div>
-            <details>
-                <summary>
+        <div className={`krogerProduct`}>
+            {/* <div> */}
+                <p className={`productDescription`}>{`${product.krogerInfo.description}`}</p>
+                <div className={`krogerProductHeader`}>
                     <button onClick={() => {handleImageChange(`left`,imagesArray.length)}}>{`<`}</button>
-                    <img src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
+                    <img className={`productImage`} src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
                     <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
-                    <br/>
-                    <p>{`${product.krogerInfo.description} $${product.krogerInfo.items[0].price.regular}`}</p>
-                    <p>Size: {product.krogerInfo.items[0].size}</p>
-                </summary>
-                <input defaultValue={product.quantityInRecipe} onChange ={(e) => {handleProductChange(e,`quantity`)}}></input>
-                <select defaultValue={product.sizeInRecipe} onChange={(e) => {handleProductChange(e,`size`)}}>
-                    {product.sizes.map((size,index) => {
-                        return <option key={index}>
-                        {size.size}
-                    </option>
-                        // if (size.size === product.sizeInRecipe) {
-                        //     return <option selected key={index}>
-                        //         {size.size}
-                        //     </option>
-                        // } else {
-                        //     return <option key={index}>
-                        //     {size.size}
-                        // </option>
-                        // }
-                    })}
-                </select>
-                <p>{price}</p>
-            </details>
+                </div>
+                <div className={`productDetails`}>
+                    <p>{`Store Price: ${state.usdCurrency.format(product.krogerInfo.items[0].price.regular)}`}</p>
+                    <p>Store Size: {product.krogerInfo.items[0].size}</p>
+                    <p>Quantity in Recipe: <input value={product.quantityInRecipe} onChange={(e) => {
+                        state.setRecipes(prev => {
+                            const newState = [...prev]
+                            newState.find(oldRecipe => oldRecipe._id === recipe._id).products[product.krogerInfo.productId].quantityInRecipe = e.target.value
+                            return newState
+                        })
+                        state.setSelectedRecipe(prev => {
+                            const newState = {...prev}
+                            newState.products[product.krogerInfo.productId].quantityInRecipe = e.target.value
+                            return newState
+                        })
+                    }}></input></p>
+                    <p>Size in Recipe: <select value={product.sizeInRecipe} onChange={(e) => {
+                            state.setRecipes(prev => {
+                                const newState = [...prev]
+                                newState.find(oldRecipe => oldRecipe._id === recipe._id).products[product.krogerInfo.productId].sizeInRecipe = e.target.value
+                                return newState
+                            })
+                            state.setSelectedRecipe(prev => {
+                                const newState = {...prev}
+                                newState.products[product.krogerInfo.productId].sizeInRecipe = e.target.value
+                                return newState
+                            })
+                            }}>
+                            {product.sizes.map((size,index) => {
+                                return <option key={index}>{size.size}</option>
+                            })}
+                        </select>
+                    </p>
+                    <p>Price: {state.usdCurrency.format(price)}</p>
+                </div>
+                <div className={`productSpacer`}></div>
+            {/* </div> */}
         </div>
     )
 }

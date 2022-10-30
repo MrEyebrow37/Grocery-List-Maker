@@ -2,7 +2,7 @@ const Location = ({location,state,functions}) => {
 
     return (
         <details className={`location`}>
-            <summary>{`${location.name}`}</summary>
+            <summary className={`locationName`}>{`${location.name}`}</summary>
             <address>{`${location.address.addressLine1}`} <br/>
             {`${location.address.city}, ${location.address.state} ${location.address.zipCode}`}
             </address>

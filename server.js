@@ -86,6 +86,9 @@ app.post("/api/products", async(req,res) => {
         })
 
         const newSizes = sizes.flatMap(size => {
+            if (size.originalSize === `lbs`) {
+                size.originalSize = `lb`
+            }
             if (size.originalSize && size.originalSize !== (`ct`) && size.originalSize !== (`12pk`) && size.originalSize !== (`bottles`) && size.originalSize !== (`pouches`) && size.originalSize !== (`pk`)) {
                 possibleSizes = convert().from(size.originalSize).possibilities()
                 const newPossibleSizes = possibleSizes.map(possible => {

@@ -56,49 +56,28 @@ const Product = ({product,state,functions}) => {
     }
 
     return (
-        <div>
-                
-            <div>
-
-                <button onClick={() => {handleImageChange(`left`,imagesArray.length)}}>{`<`}</button>
-                <img onClick={(e) => {
-                    functions.toggleProductModal(e)
+        <div className={`krogerProduct`}>
+            {/* <div> */}
+                <p className={`productDescription cursor-pointer`} onClick={(e) => {
+                    functions.toggleModal(e,`productModal`)
                     state.setSelectedProduct(product)
                     state.setImageNumber(imageNumber)
-                }} className={`cursor-pointer`} src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
-                <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
-                <p>{`${product.description}`}</p>
-                <p>{`$${product.items[0].price.regular}`}</p>
-                <p>Size: {product.items[0].size}</p>
-                
-
-                {/* Add
-                <input defaultValue={quantity} placeholder={`Quantity`} onChange={(e) => {setQuantity(e.target.value)}}></input>
-                <select onChange={(e) => {setUnit(e.target.value)}}>
-                    {product.sizes.map((size,index) => {
-                        // return <option key={index}>
-                        //     {size.size}
-                        // </option>
-                        if (size.size === size.originalSize) {
-                            return <option selected key={index}>
-                                {size.size}
-                            </option>
-                        } else {
-                            return <option key={index}>
-                            {size.size}
-                        </option>
-                        }
-                    })}
-                </select>
-                to 
-                <select className={`recipeSelector id${product.productId}`}>
-                    <option>Make new recipe</option>
-                    {state.recipes.map((recipe,index) => {
-                        return <option key={index}>{recipe.title}</option>
-                    })}
-                </select>
-                <button onClick={() => {functions.addToRecipe({recipeTitle: document.querySelector(`.id${product.productId}`).value, product: product, quantityInRecipe: Number(quantity), sizeInRecipe: unit})}}>Add</button> */}
-            </div>
+                }}>{`${product.description}`}</p>
+                <div className={`krogerProductHeader`}>
+                    <button onClick={() => {handleImageChange(`left`,imagesArray.length)}}>{`<`}</button>
+                    <img onClick={(e) => {
+                        functions.toggleModal(e,`productModal`)
+                        state.setSelectedProduct(product)
+                        state.setImageNumber(imageNumber)
+                    }} className={`cursor-pointer productImage`} src={imagesArray[imageNumber].url} alt="image" width="200" height="200"></img>
+                    <button onClick={() => {handleImageChange(`right`,imagesArray.length)}}>{`>`}</button>
+                </div>
+                <div className={`productDetails`}>
+                    <p>{`Price: ${state.usdCurrency.format(product.items[0].price.regular)}`}</p>
+                    <p>Size: {product.items[0].size}</p>
+                </div>
+                <div className={`productSpacer`}></div>
+            {/* </div> */}
         </div>
     )
 }
